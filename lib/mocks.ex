@@ -29,13 +29,18 @@ defmodule Pavlov.Mocks do
       allow MyModule |> to_receive(...)
   """
   def allow(module, opts \\ [:no_link]) do
-    :meck.new(module, opts)
+    case Process.whereis(String.to_atom("#{to_string(module)}_meck")) do
+      nil -> setup_meck(module, opts)
+      _   -> module
+    end
+  end
 
+  defp setup_meck(module, opts) do
+    :meck.new(module, opts)
     # Unload the module once the test exits
     on_exit fn ->
       :meck.unload(module)
     end
-
     module
   end
 

@@ -15,6 +15,20 @@ defmodule PavlovMocksTest do
         expect Mockable |> to_have_received :do_something
         expect result |> to_eq(:error)
       end
+
+      it "permits multiple mocks on a module" do
+        allow(Mockable) |> to_receive(do_something: fn -> :error end)
+        allow(Mockable) |> to_receive(do_something_else: fn -> :success end)
+
+        result = Mockable.do_something()
+        other_result = Mockable.do_something_else()
+
+        expect Mockable |> to_have_received :do_something
+        expect result |> to_eq(:error)
+
+        expect Mockable |> to_have_received :do_something_else
+        expect other_result |> to_eq(:success)
+      end
     end
 
     describe ".not_to_have_received" do
